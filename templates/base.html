@@ -1,0 +1,108 @@
+{% load static cravio_extras %}<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#d4243f">
+  <meta name="description" content="Cravio: order from restaurants near you in Kozhikode, Kannur and Bengaluru.">
+  <title>{% block title %}Cravio - Cravings, delivered nearby{% endblock %}</title>
+  <link rel="icon" href="{% static 'img/favicon.svg' %}" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap">
+  <link rel="stylesheet" href="{% static_v 'css/style.css' %}">
+  {% block extra_head %}{% endblock %}
+</head>
+<body>
+{% include "_icons.html" %}
+
+<header class="nav">
+  <div class="container nav-inner">
+    <a class="brand" href="{% url 'restaurants:list' %}" aria-label="Cravio home">
+      <svg class="brand-mark" aria-hidden="true"><use href="#logo"/></svg>
+      <span>cravi<b>o</b></span>
+    </a>
+
+    {# The menu button is a real checkbox, so it works with a keyboard and without JavaScript. #}
+    <label class="nav-burger">
+      <input type="checkbox" class="nav-toggle" aria-label="Menu">
+      <svg class="icon"><use href="#i-menu"/></svg>
+    </label>
+
+    <nav class="nav-links" aria-label="Main">
+      <a href="{% url 'restaurants:list' %}">Restaurants</a>
+      {% if user.is_authenticated %}
+        {% if user.role == 'customer' %}
+          <a href="{% url 'orders:history' %}">My orders</a>
+        {% elif user.role == 'vendor' %}
+          <a href="{% url 'restaurants:vendor_dashboard' %}">Dashboard</a>
+        {% elif user.role == 'admin' %}
+          <a href="{% url 'accounts:admin_dashboard' %}">Dashboard</a>
+          <a href="{% url 'admin:index' %}">Django admin</a>
+        {% endif %}
+      {% endif %}
+
+      <span class="nav-spacer"></span>
+
+      {% if not user.is_authenticated or user.role == 'customer' %}
+      <a class="loc-chip" href="{% url 'restaurants:list' %}#deliver" title="Change delivery location">
+        <svg class="icon"><use href="#i-pin"/></svg>
+        <span>{% if delivery_location %}{{ delivery_location.label }}{% else %}Set location{% endif %}</span>
+      </a>
+      {% endif %}
+
+      {% if not user.is_authenticated or user.role == 'customer' %}
+        <a class="cart-pill" href="{% url 'orders:cart' %}" aria-label="Cart, {{ cart_count }} item{{ cart_count|pluralize }}">
+          <svg class="icon"><use href="#i-bag"/></svg>
+          <span>Cart</span>
+          {% if cart_count %}<span class="cart-count">{{ cart_count }}</span>{% endif %}
+        </a>
+      {% endif %}
+
+      {% if user.is_authenticated %}
+        <span class="user-chip" title="Signed in as {{ user.username }}">
+          <span class="avatar">{{ user.username|first|upper }}</span>
+          <span class="user-name">{{ user.username }}</span>
+          <span class="badge badge-role">{{ user.get_role_display }}</span>
+        </span>
+        <form method="post" action="{% url 'accounts:logout' %}" class="inline">{% csrf_token %}
+          <button class="btn btn-ghost btn-sm">Log out</button>
+        </form>
+      {% else %}
+        <a class="btn btn-ghost btn-sm" href="{% url 'accounts:login' %}">Log in</a>
+        <a class="btn btn-primary btn-sm" href="{% url 'accounts:signup' %}">Sign up</a>
+      {% endif %}
+    </nav>
+  </div>
+</header>
+
+{% if messages %}
+<div class="toasts" role="status" aria-live="polite">
+  {% for message in messages %}
+  <div class="toast {{ message.tags }}">
+    <svg class="icon"><use href="{% if 'error' in message.tags %}#i-alert{% else %}#i-check{% endif %}"/></svg>
+    <span>{{ message }}</span>
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
+
+{% block hero %}{% endblock %}
+
+<main class="container page">
+  {% block content %}{% endblock %}
+</main>
+
+<footer class="footer">
+  <div class="container footer-inner">
+    <span class="brand small"><svg class="brand-mark" aria-hidden="true"><use href="#logo"/></svg><span>cravi<b>o</b></span></span>
+    <span>A Django portfolio project. Payments run in test mode. Not affiliated with the restaurants shown.</span>
+  </div>
+</footer>
+{% if not user.is_authenticated or user.role == 'customer' %}
+  {% include "assistant/_widget.html" %}
+  <script src="{% static_v 'js/assistant.js' %}"></script>
+{% endif %}
+{% block scripts %}{% endblock %}
+</body>
+</html>
