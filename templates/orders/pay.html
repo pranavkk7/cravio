@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% load cravio_extras %}
+{% block title %}Pay for order #{{ order.pk }} - Cravio{% endblock %}
+
+{% block content %}
+<div class="card pay-card">
+  <span class="badge badge-warning">Waiting for payment</span>
+  <p class="muted" style="margin-top:14px">Order #{{ order.pk }} from {{ order.restaurant }}</p>
+  <p class="pay-amount">{{ order.total|inr }}</p>
+
+  <div class="receipt">
+    {% for line in order.lines.all %}
+    <div class="summary-row"><span>{{ line.quantity }} × {{ line.name }}</span><span>{{ line.subtotal|inr }}</span></div>
+    {% endfor %}
+    <div class="summary-row summary-total"><span>Total</span><span>{{ order.total|inr }}</span></div>
+  </div>
+
+  <form id="callback-form" method="post" action="{% url 'orders:callback' order.pk %}">{% csrf_token %}
+    <input type="hidden" name="razorpay_payment_id" id="rzp_payment_id">
+    <input type="hidden" name="razorpay_signature" id="rzp_signature">
+    {% if razorpay_enabled %}
+      <button type="button" id="pay-btn" class="btn btn-primary btn-block"><svg class="icon"><use href="#i-lock"/></svg> Pay {{ order.total|inr }} with Razorpay</button>
+      <p class="muted small" style="margin-top:10px">Secured by Razorpay. Your card details never touch this site.</p>
+    {% else %}
+      <button class="btn btn-primary btn-block"><svg class="icon"><use href="#i-check"/></svg> Simulate payment</button>
+      <div class="note info" style="text-align:left"><svg class="icon"><use href="#i-alert"/></svg> <span>Razorpay keys are not configured, so this is a <b>simulated payment</b>. No real money is involved.</span></div>
+    {% endif %}
+  </form>
+</div>
+
+{% if razorpay_enabled %}
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<script>
+  document.getElementById("pay-btn").onclick = function () {
+    new Razorpay({
+      key: "{{ razorpay_key }}",
+      amount: {{ order.amount_in_paise }},
+      currency: "INR",
+      name: "Cravio",
+      order_id: "{{ order.razorpay_order_id }}",
+      theme: { color: "#d43d12" },
+      handler: function (resp) {
+        document.getElementById("rzp_payment_id").value = resp.razorpay_payment_id;
+        document.getElementById("rzp_signature").value = resp.razorpay_signature;
+        document.getElementById("callback-form").submit();
+      },
+    }).open();
+  };
+</script>
+{% endif %}
+{% endblock %}

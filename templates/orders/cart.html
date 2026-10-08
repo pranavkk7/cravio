@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+{% load static cravio_extras %}
+{% block title %}Your cart - Cravio{% endblock %}
+
+{% block content %}
+<div class="page-head">
+  <div>
+    <h1>Your cart</h1>
+    {% if restaurant and lines %}<p class="muted">From <a href="{% url 'restaurants:detail' restaurant.pk %}">{{ restaurant.name }}</a></p>{% endif %}
+  </div>
+</div>
+
+{% if lines %}
+<div class="split">
+  <div class="card">
+    {% for l in lines %}
+    <div class="line">
+      {% if l.item.image %}<img class="menu-photo" src="{% static l.item.image %}" alt="" loading="lazy">{% else %}<span class="menu-tile" aria-hidden="true">{{ l.item.name|initial }}</span>{% endif %}
+      <div class="line-info">
+        <h3>{{ l.item.name }}</h3>
+        <p class="muted small">{{ l.item.price|inr }} each</p>
+      </div>
+      <div class="stepper" role="group" aria-label="Quantity of {{ l.item.name }}">
+        <form method="post" action="{% url 'orders:update' l.item.pk %}">{% csrf_token %}
+          <input type="hidden" name="action" value="dec">
+          <button aria-label="One less {{ l.item.name }}"><svg class="icon"><use href="#i-minus"/></svg></button>
+        </form>
+        <span class="qty" aria-live="polite">{{ l.quantity }}</span>
+        <form method="post" action="{% url 'orders:update' l.item.pk %}">{% csrf_token %}
+          <input type="hidden" name="action" value="inc">
+          <button aria-label="One more {{ l.item.name }}"><svg class="icon"><use href="#i-plus"/></svg></button>
+        </form>
+      </div>
+      <span class="line-total">{{ l.subtotal|inr }}</span>
+      <form method="post" action="{% url 'orders:remove' l.item.pk %}">{% csrf_token %}
+        <button class="icon-btn" aria-label="Remove {{ l.item.name }}" title="Remove"><svg class="icon"><use href="#i-trash"/></svg></button>
+      </form>
+    </div>
+    {% endfor %}
+  </div>
+
+  <aside class="card summary">
+    <h2>Order summary</h2>
+    <div class="summary-row" style="margin-top:12px"><span class="muted">Items ({{ cart_count }})</span><span>{{ total|inr }}</span></div>
+    <div class="summary-row"><span class="muted">Delivery</span><span class="badge badge-success">Free</span></div>
+    <div class="summary-row summary-total"><span>To pay</span><span>{{ total|inr }}</span></div>
+
+    <div class="deliver-summary">
+      {% if location and in_range %}
+        <p><svg class="icon"><use href="#i-pin"/></svg> <span>To <b>{{ location.label }}</b></span></p>
+        <p class="muted small"><svg class="icon"><use href="#i-clock"/></svg> <span>{{ distance|km }} away · arrives in {{ eta.0 }}–{{ eta.1 }} min</span></p>
+      {% elif location %}
+        <div class="note" style="margin-top:0"><svg class="icon"><use href="#i-alert"/></svg> <span><b>{{ restaurant.name }}</b> does not deliver to {{ location.label }}{% if distance is not None %} ({{ distance|km }} away){% endif %}. Choose another location or restaurant.</span></div>
+      {% else %}
+        <p class="muted small" style="margin-bottom:10px">Where should we deliver?</p>
+      {% endif %}
+      {% if not location or not in_range %}<div class="deliver-light">{% include "_location_picker.html" with picker_id="cart" %}</div>{% endif %}
+    </div>
+
+    {% if user.is_authenticated and user.role == 'customer' %}
+      <form method="post" action="{% url 'orders:checkout' %}" style="margin-top:18px">{% csrf_token %}
+        <button class="btn btn-primary btn-block"{% if not in_range %} disabled{% endif %}><svg class="icon"><use href="#i-lock"/></svg> Proceed to payment</button>
+      </form>
+    {% elif user.is_authenticated %}
+      <div class="note"><svg class="icon"><use href="#i-alert"/></svg> <span>Only customer accounts can place orders. You are signed in as {{ user.get_role_display|lower }}.</span></div>
+    {% else %}
+      <a class="btn btn-primary btn-block" style="margin-top:18px" href="{% url 'accounts:login' %}?next={% url 'orders:cart' %}">Log in to check out</a>
+      <p class="muted small" style="margin-top:10px;text-align:center">New here? <a href="{% url 'accounts:signup' %}">Create an account</a></p>
+    {% endif %}
+  </aside>
+</div>
+{% else %}
+<div class="empty">
+  <div class="empty-icon"><svg class="icon"><use href="#i-bag"/></svg></div>
+  <h3>Your cart is empty</h3>
+  <p class="muted">Add a few dishes and they will show up here.</p>
+  <a class="btn btn-primary" href="{% url 'restaurants:list' %}">Browse restaurants</a>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}<script src="{% static_v 'js/location.js' %}"></script>{% endblock %}

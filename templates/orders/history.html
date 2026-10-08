@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% load cravio_extras %}
+{% block title %}My orders - Cravio{% endblock %}
+
+{% block content %}
+<div class="page-head">
+  <div>
+    <h1>My orders</h1>
+    <p class="muted">Track what is on the way and look back at past orders.</p>
+  </div>
+  <a class="btn btn-outline btn-sm" href="{% url 'restaurants:list' %}">Order again</a>
+</div>
+
+{% if orders %}
+<div class="order-list">
+  {% for o in orders %}
+  <article class="card">
+    <div class="order-head">
+      <div>
+        <h3>{{ o.restaurant }}</h3>
+        <p class="muted small">Order #{{ o.pk }} · {{ o.created_at|date:"j M Y, g:i A" }}</p>
+      </div>
+      {% if o.status == 'pending_payment' %}<span class="badge badge-warning">{{ o.get_status_display }}</span>
+      {% elif o.status == 'delivered' %}<span class="badge badge-success">{{ o.get_status_display }}</span>
+      {% else %}<span class="badge badge-info">{{ o.get_status_display }}</span>{% endif %}
+    </div>
+
+    <p class="order-items">{% for l in o.lines.all %}{{ l.quantity }} × {{ l.name }}{% if not forloop.last %}, {% endif %}{% endfor %}</p>
+
+    {# Progress tracker: every step up to the order's current step is filled in. #}
+    <ol class="tracker" aria-label="Order progress: {{ o.get_status_display }}">
+      <li class="done{% if o.progress_step == 0 %} current{% endif %}">Placed</li>
+      <li class="{% if o.progress_step >= 1 %}done{% endif %}{% if o.progress_step == 1 %} current{% endif %}">Paid</li>
+      <li class="{% if o.progress_step >= 2 %}done{% endif %}{% if o.progress_step == 2 %} current{% endif %}">Preparing</li>
+      <li class="{% if o.progress_step >= 3 %}done current{% endif %}">Delivered</li>
+    </ol>
+
+    <div class="order-foot">
+      <b>{{ o.total|inr }}</b>
+      {% if o.status == 'pending_payment' %}
+        <a class="btn btn-primary btn-sm" href="{% url 'orders:pay' o.pk %}">Pay now</a>
+      {% else %}
+        <a class="btn btn-ghost btn-sm" href="{% url 'restaurants:detail' o.restaurant_id %}">View restaurant</a>
+      {% endif %}
+    </div>
+  </article>
+  {% endfor %}
+</div>
+{% else %}
+<div class="empty">
+  <div class="empty-icon"><svg class="icon"><use href="#i-receipt"/></svg></div>
+  <h3>No orders yet</h3>
+  <p class="muted">When you place an order, you can follow it here from kitchen to doorstep.</p>
+  <a class="btn btn-primary" href="{% url 'restaurants:list' %}">Find something tasty</a>
+</div>
+{% endif %}
+{% endblock %}
