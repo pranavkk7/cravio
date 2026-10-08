@@ -1,0 +1,114 @@
+{% extends "base.html" %}
+{% load static cravio_extras %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+      integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
+{% endblock %}
+
+{% block hero %}
+<section class="hero">
+  <div class="container hero-inner">
+    <span class="hero-tag"><svg class="icon"><use href="#i-flame"/></svg> Kozhikode · Kannur · Bengaluru</span>
+    <h1>Your cravings, from <span>kitchens near you</span>.</h1>
+    <p>Malabar biryani, smoky mandi, fried chicken or a late-night kunafa. See what delivers to you and how fast.</p>
+
+    {% include "_location_picker.html" %}
+
+    <form class="search" method="get" action="{% url 'restaurants:list' %}" role="search">
+      {% if city %}<input type="hidden" name="city" value="{{ city.key }}">{% endif %}
+      <label>
+        <svg class="icon"><use href="#i-search"/></svg>
+        <input type="search" name="q" value="{{ query }}" placeholder="Search restaurants, cuisines or dishes" aria-label="Search restaurants, cuisines or dishes">
+      </label>
+      <button class="btn btn-primary">Search</button>
+    </form>
+  </div>
+</section>
+{% endblock %}
+
+{% block content %}
+<nav class="city-tabs" aria-label="Cities">
+  <a href="?city=all{% if query %}&amp;q={{ query|urlencode }}{% endif %}" {% if not city %}aria-current="page"{% endif %}>All cities</a>
+  {% for c in cities %}
+  <a href="?city={{ c.key }}{% if query %}&amp;q={{ query|urlencode }}{% endif %}" {% if city.key == c.key %}aria-current="page"{% endif %}>{{ c.name }}</a>
+  {% endfor %}
+</nav>
+
+<div class="page-head">
+  <div>
+    {% if query %}
+      <h2>Results for "{{ query }}"</h2>
+      <p class="muted">{{ restaurants|length }} restaurant{{ restaurants|length|pluralize }} found · <a href="{% url 'restaurants:list' %}{% if city %}?city={{ city.key }}{% endif %}">Clear search</a></p>
+    {% elif location %}
+      {% if nearby_count %}
+        <h2>Delivering to you</h2>
+        <p class="muted">{{ nearby_count }} of {{ restaurants|length }} place{{ restaurants|length|pluralize }} {% if city %}in {{ city.name }} {% endif %}deliver{{ nearby_count|pluralize:"s," }} to {{ location.label }}, nearest first</p>
+      {% else %}
+        <h2>Nothing delivers here yet</h2>
+        <p class="muted">None of these {{ restaurants|length }} place{{ restaurants|length|pluralize }} deliver{{ restaurants|length|pluralize:"s," }} to {{ location.label }}. Try a nearby area.</p>
+      {% endif %}
+    {% else %}
+      <h2>Restaurants open now</h2>
+      <p class="muted">{{ restaurants|length }} place{{ restaurants|length|pluralize }} ready to take your order{% if city %} in {{ city.name }}{% endif %}. Set your location to see delivery times.</p>
+    {% endif %}
+  </div>
+</div>
+
+{% if restaurants %}
+<details class="map-panel" data-map-panel>
+  <summary><svg class="icon"><use href="#i-map"/></svg> <span class="when-closed">Show on map</span><span class="when-open">Hide map</span></summary>
+  <div class="map" role="region" aria-label="Map of restaurants"></div>
+</details>
+{{ map_data|json_script:"map-data" }}
+
+<div class="grid">
+  {% for r in restaurants %}
+  <a class="restaurant-card{% if location and not r.in_range %} is-far{% endif %}" href="{{ r.get_absolute_url }}">
+    <div class="cover {{ r.pk|cover }}">
+      {% if r.cover_image %}<img src="{% static r.cover_image %}" alt="" loading="lazy">{% else %}<span class="cover-letter" aria-hidden="true">{{ r.name|initial }}</span>{% endif %}
+      {% if location %}
+        {% if r.in_range %}<span class="badge badge-eta"><svg class="icon"><use href="#i-clock"/></svg> {{ r.eta.0 }}–{{ r.eta.1 }} min</span>
+        {% else %}<span class="badge badge-far">Out of delivery range</span>{% endif %}
+      {% else %}
+        <span class="badge"><svg class="icon"><use href="#i-check"/></svg> Open</span>
+      {% endif %}
+    </div>
+    <div class="restaurant-body">
+      <div class="title-row">
+        <h3>{{ r.name }}</h3>
+        {% if r.distance is not None %}<span class="distance">{{ r.distance|km }}</span>{% endif %}
+      </div>
+      {% if r.cuisine %}<p class="cuisine">{{ r.cuisine }}</p>{% endif %}
+      <p class="muted small">{{ r.description|default:"Delicious food, made fresh to order." }}</p>
+      <div class="restaurant-meta">
+        {% if r.area_name %}<span><svg class="icon"><use href="#i-pin"/></svg> {{ r.area_name }}, {{ r.city.name }}</span>{% elif r.address %}<span><svg class="icon"><use href="#i-pin"/></svg> {{ r.address|truncatechars:26 }}</span>{% endif %}
+        {% if r.min_price %}<span><svg class="icon"><use href="#i-wallet"/></svg> From {{ r.min_price|inr }}</span>{% endif %}
+        <span><svg class="icon"><use href="#i-utensils"/></svg> {{ r.item_count }} dish{{ r.item_count|pluralize:"es" }}</span>
+      </div>
+    </div>
+  </a>
+  {% endfor %}
+</div>
+{% else %}
+<div class="empty">
+  <div class="empty-icon"><svg class="icon"><use href="#i-search"/></svg></div>
+  {% if query %}
+    <h3>Nothing matches "{{ query }}"</h3>
+    <p class="muted">Try a different restaurant, cuisine or dish{% if city %}, or search all cities{% endif %}.</p>
+    <a class="btn btn-outline" href="{% url 'restaurants:list' %}?city=all">Show all restaurants</a>
+  {% else %}
+    <h3>No restaurants here yet</h3>
+    <p class="muted">Own a restaurant? Sign up as a vendor and add your menu in minutes.</p>
+    <a class="btn btn-primary" href="{% url 'accounts:signup' %}">Become a vendor</a>
+  {% endif %}
+</div>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+        integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<script src="{% static_v 'js/map.js' %}"></script>
+<script src="{% static_v 'js/location.js' %}"></script>
+{% endblock %}

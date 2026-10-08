@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% load cravio_extras %}
+{% block title %}Delete {{ item.name }} - Cravio{% endblock %}
+
+{% block content %}
+<div class="card form-card" style="text-align:center">
+  <div class="empty-icon" style="color:var(--danger);background:var(--danger-soft)"><svg class="icon"><use href="#i-trash"/></svg></div>
+  <h1>Delete "{{ item.name }}"?</h1>
+  <p class="muted" style="margin-top:8px">This removes the dish ({{ item.price|inr }}) from your menu. Past orders keep their record of it.</p>
+  <form method="post" class="form-actions" style="justify-content:center">{% csrf_token %}
+    <button class="btn btn-danger">Yes, delete it</button>
+    <a class="btn btn-ghost" href="{% url 'restaurants:vendor_dashboard' %}">Keep it</a>
+  </form>
+</div>
+{% endblock %}

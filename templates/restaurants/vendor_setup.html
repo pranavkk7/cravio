@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %}Set up your restaurant - Cravio{% endblock %}
+
+{% block content %}
+<div class="card form-card">
+  <span class="badge badge-role">Step 1 of 2</span>
+  <h1 style="margin-top:12px">Set up your restaurant</h1>
+  <p class="muted" style="margin:6px 0 22px">Tell customers who you are. You can change these details later.</p>
+  <form method="post" novalidate>{% csrf_token %}
+    {% include "_form_fields.html" %}
+    <div class="form-actions">
+      <button class="btn btn-primary">Create restaurant</button>
+    </div>
+  </form>
+</div>
+{% endblock %}

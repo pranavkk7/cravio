@@ -1,0 +1,41 @@
+{# Where to deliver: the browser's location (with JavaScript) or an area picked from the list (works without it). #}
+<div class="deliver" id="deliver">
+  {% if delivery_location %}
+  <div class="deliver-current">
+    <span class="deliver-icon"><svg class="icon"><use href="#i-pin"/></svg></span>
+    <div>
+      <span class="deliver-label">Delivering to</span>
+      <b>{{ delivery_location.label }}</b>
+    </div>
+    <form method="post" action="{% url 'restaurants:clear_location' %}">{% csrf_token %}
+      <input type="hidden" name="next" value="{{ request.get_full_path }}">
+      <button class="link-button">Clear</button>
+    </form>
+  </div>
+  {% endif %}
+
+  <div class="deliver-actions">
+    <form method="post" action="{% url 'restaurants:set_location' %}" data-locate>{% csrf_token %}
+      <input type="hidden" name="lat"><input type="hidden" name="lng">
+      <input type="hidden" name="next" value="{{ request.get_full_path }}">
+      <button class="btn btn-locate" data-locate-button>
+        <svg class="icon"><use href="#i-locate"/></svg> <span>Use my location</span>
+      </button>
+    </form>
+    <span class="deliver-or">or</span>
+    <form method="post" action="{% url 'restaurants:set_location' %}" class="area-form">{% csrf_token %}
+      <input type="hidden" name="next" value="{{ request.get_full_path }}">
+      <label class="visually-hidden" for="area-{{ picker_id|default:'main' }}">Choose your area</label>
+      <select name="area" id="area-{{ picker_id|default:'main' }}" required>
+        <option value="">Choose your area</option>
+        {% for city in service_cities %}
+        <optgroup label="{{ city.name }}">
+          {% for area in city.areas %}<option value="{{ area.key }}">{{ area.name }}, {{ city.name }}</option>{% endfor %}
+        </optgroup>
+        {% endfor %}
+      </select>
+      <button class="btn btn-dark">Set</button>
+    </form>
+  </div>
+  <p class="deliver-status" data-locate-status role="status" aria-live="polite"></p>
+</div>

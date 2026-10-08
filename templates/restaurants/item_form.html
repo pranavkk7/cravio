@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %}{% if item %}Edit {{ item.name }}{% else %}Add a dish{% endif %} - Cravio{% endblock %}
+
+{% block content %}
+<div class="card form-card">
+  <h1>{% if item %}Edit dish{% else %}Add a dish{% endif %}</h1>
+  <p class="muted" style="margin:6px 0 22px">{% if item %}Update the details customers see on your menu.{% else %}Give it a clear name and price. A short description helps it sell.{% endif %}</p>
+  <form method="post" novalidate>{% csrf_token %}
+    {% include "_form_fields.html" %}
+    <div class="form-actions">
+      <button class="btn btn-primary">Save dish</button>
+      <a class="btn btn-ghost" href="{% url 'restaurants:vendor_dashboard' %}">Cancel</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

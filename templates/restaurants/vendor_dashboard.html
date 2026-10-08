@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+{% load cravio_extras %}
+{% block title %}{{ restaurant.name }} dashboard - Cravio{% endblock %}
+
+{% block content %}
+<div class="page-head">
+  <div>
+    <h1>{{ restaurant.name }}</h1>
+    <p class="muted">
+      {% if restaurant.is_open %}<span class="badge badge-success">Open for orders</span>{% else %}<span class="badge badge-danger">Closed</span>{% endif %}
+      {% if restaurant.area_name %} · {{ restaurant.area_name }}, {{ restaurant.city.name }}{% elif restaurant.address %} · {{ restaurant.address }}{% endif %}
+      · delivers within {{ restaurant.delivery_radius_km|floatformat:"-1" }} km
+    </p>
+  </div>
+  <div class="form-actions" style="margin-top:0">
+    <a class="btn btn-outline btn-sm" href="{% url 'restaurants:detail' restaurant.pk %}">View public page</a>
+    <a class="btn btn-primary btn-sm" href="{% url 'restaurants:item_create' %}"><svg class="icon"><use href="#i-plus"/></svg> Add dish</a>
+  </div>
+</div>
+
+<div class="stats">
+  <div class="stat"><span class="stat-icon green"><svg class="icon"><use href="#i-wallet"/></svg></span><div><div class="stat-value">{{ stats.revenue|inr }}</div><div class="stat-label">Revenue</div></div></div>
+  <div class="stat"><span class="stat-icon blue"><svg class="icon"><use href="#i-receipt"/></svg></span><div><div class="stat-value">{{ stats.orders }}</div><div class="stat-label">Paid orders</div></div></div>
+  <div class="stat"><span class="stat-icon amber"><svg class="icon"><use href="#i-flame"/></svg></span><div><div class="stat-value">{{ stats.to_prepare }}</div><div class="stat-label">To prepare</div></div></div>
+  <div class="stat"><span class="stat-icon"><svg class="icon"><use href="#i-utensils"/></svg></span><div><div class="stat-value">{{ stats.items }}</div><div class="stat-label">Dishes on the menu</div></div></div>
+</div>
+
+<section class="section">
+  <div class="section-head">
+    <h2>Orders</h2>
+    <span class="muted small">Newest first</span>
+  </div>
+  {% if orders %}
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Order</th><th>Customer</th><th>Items</th><th class="num">Total</th><th>Status</th></tr></thead>
+      <tbody>
+        {% for o in orders %}
+        <tr>
+          <td><b>#{{ o.pk }}</b><div class="muted small">{{ o.created_at|date:"j M, g:i A" }}</div></td>
+          <td>{{ o.customer }}</td>
+          <td>{% for l in o.lines.all %}{{ l.quantity }} × {{ l.name }}{% if not forloop.last %}, {% endif %}{% endfor %}</td>
+          <td class="num"><b>{{ o.total|inr }}</b></td>
+          <td>
+            {% if o.status == 'pending_payment' %}
+              <span class="badge badge-warning">Waiting for payment</span>
+            {% else %}
+            <form method="post" action="{% url 'restaurants:order_status' o.pk %}" class="status-form">{% csrf_token %}
+              <select name="status" aria-label="Status of order {{ o.pk }}" onchange="this.form.submit()">
+                {% for value, label in statuses %}<option value="{{ value }}"{% if o.status == value %} selected{% endif %}>{{ label }}</option>{% endfor %}
+              </select>
+              <noscript><button class="btn btn-outline btn-sm">Update</button></noscript>
+            </form>
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="empty">
+    <div class="empty-icon"><svg class="icon"><use href="#i-receipt"/></svg></div>
+    <h3>No orders yet</h3>
+    <p class="muted">Orders from customers will appear here as soon as they come in.</p>
+  </div>
+  {% endif %}
+</section>
+
+<section class="section">
+  <div class="section-head">
+    <h2>Menu</h2>
+    <a class="btn btn-outline btn-sm" href="{% url 'restaurants:item_create' %}"><svg class="icon"><use href="#i-plus"/></svg> Add dish</a>
+  </div>
+  {% if items %}
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Dish</th><th class="num">Price</th><th>Availability</th><th></th></tr></thead>
+      <tbody>
+        {% for item in items %}
+        <tr>
+          <td><b>{{ item.name }}</b>{% if item.description %}<div class="muted small">{{ item.description }}</div>{% endif %}</td>
+          <td class="num">{{ item.price|inr }}</td>
+          <td>{% if item.is_available %}<span class="badge badge-success">Available</span>{% else %}<span class="badge badge-neutral">Hidden</span>{% endif %}</td>
+          <td>
+            <div class="row-actions">
+              <a class="btn btn-ghost btn-sm" href="{% url 'restaurants:item_edit' item.pk %}"><svg class="icon"><use href="#i-edit"/></svg> Edit</a>
+              <a class="btn btn-ghost btn-sm" href="{% url 'restaurants:item_delete' item.pk %}" aria-label="Delete {{ item.name }}"><svg class="icon"><use href="#i-trash"/></svg> Delete</a>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="empty">
+    <div class="empty-icon"><svg class="icon"><use href="#i-utensils"/></svg></div>
+    <h3>Your menu is empty</h3>
+    <p class="muted">Add your first dish so customers can start ordering.</p>
+    <a class="btn btn-primary" href="{% url 'restaurants:item_create' %}">Add a dish</a>
+  </div>
+  {% endif %}
+</section>
+{% endblock %}
