@@ -4,13 +4,15 @@
   <div class="deliver-current">
     <span class="deliver-icon"><svg class="icon"><use href="#i-pin"/></svg></span>
     <div>
-      <span class="deliver-label">Delivering to</span>
+      <span class="deliver-label">Delivering to{% if delivery_location.is_default %} (default){% endif %}</span>
       <b>{{ delivery_location.label }}</b>
     </div>
+    {% if not delivery_location.is_default %}
     <form method="post" action="{% url 'restaurants:clear_location' %}">{% csrf_token %}
       <input type="hidden" name="next" value="{{ request.get_full_path }}">
-      <button class="link-button">Clear</button>
+      <button class="link-button">Reset to Kannur</button>
     </form>
+    {% endif %}
   </div>
   {% endif %}
 

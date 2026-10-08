@@ -28,10 +28,14 @@
 {% endblock %}
 
 {% block content %}
-<nav class="city-tabs" aria-label="Cities">
-  <a href="?city=all{% if query %}&amp;q={{ query|urlencode }}{% endif %}" {% if not city %}aria-current="page"{% endif %}>All cities</a>
+{# Switching city moves the delivery location to that city's centre. #}
+<nav class="city-tabs" aria-label="Deliver to a city">
   {% for c in cities %}
-  <a href="?city={{ c.key }}{% if query %}&amp;q={{ query|urlencode }}{% endif %}" {% if city.key == c.key %}aria-current="page"{% endif %}>{{ c.name }}</a>
+  <form method="post" action="{% url 'restaurants:set_location' %}">{% csrf_token %}
+    <input type="hidden" name="city" value="{{ c.key }}">
+    <input type="hidden" name="next" value="{% url 'restaurants:list' %}">
+    <button {% if city.key == c.key %}aria-current="page"{% endif %}>{{ c.name }}</button>
+  </form>
   {% endfor %}
 </nav>
 
@@ -39,18 +43,13 @@
   <div>
     {% if query %}
       <h2>Results for "{{ query }}"</h2>
-      <p class="muted">{{ restaurants|length }} restaurant{{ restaurants|length|pluralize }} found · <a href="{% url 'restaurants:list' %}{% if city %}?city={{ city.key }}{% endif %}">Clear search</a></p>
-    {% elif location %}
-      {% if nearby_count %}
-        <h2>Delivering to you</h2>
-        <p class="muted">{{ nearby_count }} of {{ restaurants|length }} place{{ restaurants|length|pluralize }} {% if city %}in {{ city.name }} {% endif %}deliver{{ nearby_count|pluralize:"s," }} to {{ location.label }}, nearest first</p>
-      {% else %}
-        <h2>Nothing delivers here yet</h2>
-        <p class="muted">None of these {{ restaurants|length }} place{{ restaurants|length|pluralize }} deliver{{ restaurants|length|pluralize:"s," }} to {{ location.label }}. Try a nearby area.</p>
-      {% endif %}
+      <p class="muted">{{ restaurants|length }} restaurant{{ restaurants|length|pluralize }} delivering to {{ location.label }} · <a href="{% url 'restaurants:list' %}">Clear search</a></p>
+    {% elif restaurants %}
+      <h2>Delivering to {{ location.label }}</h2>
+      <p class="muted">{{ restaurants|length }} place{{ restaurants|length|pluralize }} deliver{{ restaurants|length|pluralize:"s," }} here, nearest first{% if location.is_default %}. Not in Kannur? Use your location or pick your area above.{% endif %}</p>
     {% else %}
-      <h2>Restaurants open now</h2>
-      <p class="muted">{{ restaurants|length }} place{{ restaurants|length|pluralize }} ready to take your order{% if city %} in {{ city.name }}{% endif %}. Set your location to see delivery times.</p>
+      <h2>Nothing delivers to {{ location.label }} yet</h2>
+      <p class="muted">Try a nearby area, or switch to Kannur, Kozhikode or Bengaluru above.</p>
     {% endif %}
   </div>
 </div>

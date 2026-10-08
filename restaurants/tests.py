@@ -51,8 +51,9 @@ class RestaurantPagesTests(TestCase):
         self.customer = User.objects.create_user("cust1", password="pass12345!", role=User.Role.CUSTOMER)
         self.admin = User.objects.create_superuser("boss", password="pass12345!")
 
-        self.spice = Restaurant.objects.create(owner=self.vendor, name="Spice Hub", description="North Indian favourites")
-        self.pasta = Restaurant.objects.create(owner=self.vendor2, name="Pasta Place", description="Italian comfort food")
+        # Both in Kannur, the default delivery location, so they show without setting a location.
+        self.spice = Restaurant.objects.create(owner=self.vendor, name="Spice Hub", description="North Indian favourites", area="fort-road")
+        self.pasta = Restaurant.objects.create(owner=self.vendor2, name="Pasta Place", description="Italian comfort food", area="thavakkara")
         self.tikka = MenuItem.objects.create(restaurant=self.spice, name="Paneer Tikka", price=Decimal("150.00"))
         MenuItem.objects.create(restaurant=self.spice, name="Butter Naan", price=Decimal("45.00"))
         MenuItem.objects.create(restaurant=self.spice, name="Secret Special", price=Decimal("20.00"), is_available=False)
@@ -273,26 +274,32 @@ class LocationPagesTests(TestCase):
         self.client.post(reverse("restaurants:clear_location"))
         self.assertNotIn("location", self.client.session)
 
-    def test_list_shows_the_location_city_nearest_first_and_out_of_range_last(self):
+    def test_list_shows_only_places_that_deliver_nearest_first(self):
         self._deliver_to("koramangala")
         response = self.client.get(reverse("restaurants:list"))
-        # Paragon is in Kozhikode, so it is not listed. Pizza Hut is about 4 km away but only
-        # delivers within 3 km, so it goes after the places that can deliver.
-        self.assertEqual([r.name for r in response.context["restaurants"]], ["KFC", "Domino's", "Pizza Hut"])
-        self.assertEqual(response.context["nearby_count"], 2)
-        self.assertContains(response, "Out of delivery range")
+        # Paragon is in Kozhikode, and Pizza Hut is about 4 km away but only delivers within 3 km.
+        self.assertEqual([r.name for r in response.context["restaurants"]], ["KFC", "Domino's"])
+        self.assertContains(response, "Delivering to Koramangala, Bengaluru")
         self.assertContains(response, "min</span>")
+        self.assertNotContains(response, "Out of delivery range")
 
-    def test_city_tabs_filter_without_a_location(self):
-        response = self.client.get(reverse("restaurants:list"), {"city": "kozhikode"})
+    def test_without_a_location_the_list_is_for_kannur(self):
+        response = self.client.get(reverse("restaurants:list"))
+        self.assertEqual(response.context["restaurants"], [])  # no Kannur outlets in this test data
+        self.assertContains(response, "Nothing delivers to Kannur yet")
+        self.assertContains(response, "Delivering to (default)")
+
+    def test_city_tab_moves_the_delivery_location_to_that_city(self):
+        self.client.post(reverse("restaurants:set_location"), {"city": "kozhikode"})
+        self.assertEqual(self.client.session["location"]["label"], "Kozhikode")
+        response = self.client.get(reverse("restaurants:list"))
         self.assertEqual([r.name for r in response.context["restaurants"]], ["Paragon"])
-        response = self.client.get(reverse("restaurants:list"), {"city": "all"})
-        self.assertEqual(len(response.context["restaurants"]), 4)
 
-    def test_map_data_lists_every_restaurant_with_a_position(self):
+    def test_map_data_lists_the_places_that_deliver(self):
+        self._deliver_to("koramangala")
         response = self.client.get(reverse("restaurants:list"))
         self.assertContains(response, 'id="map-data"')
-        self.assertEqual(len(response.context["map_data"]["restaurants"]), 4)
+        self.assertEqual([r["name"] for r in response.context["map_data"]["restaurants"]], ["KFC", "Domino's"])
 
     def test_menu_page_blocks_ordering_when_out_of_range(self):
         self._deliver_to("koramangala")

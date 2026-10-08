@@ -1,7 +1,8 @@
 """Delivery locations: the cities Cravio serves, distance maths and delivery-time estimates.
 
 The customer's location lives in the session as {"lat", "lng", "label", "city"}. It is set either
-from the browser's geolocation or by picking an area, and nothing about it is stored in the database.
+from the browser's geolocation, by picking an area or by switching city, and nothing about it is stored
+in the database. Until the customer chooses, Cravio delivers to Kannur (DEFAULT_LOCATION).
 """
 from dataclasses import dataclass
 from math import asin, cos, radians, sin, sqrt
@@ -95,8 +96,13 @@ def parse_coordinates(lat, lng):
     return lat, lng
 
 
+# Kannur town centre: where Cravio shows restaurants until the customer sets their own location.
+DEFAULT_LOCATION = {"lat": 11.8745, "lng": 75.3704, "label": "Kannur", "city": "kannur", "is_default": True}
+
+
 def get_location(session):
-    return session.get(SESSION_KEY)
+    """The customer's chosen location, or Kannur when they have not chosen one."""
+    return session.get(SESSION_KEY) or dict(DEFAULT_LOCATION)
 
 
 def set_location(session, lat, lng, label):

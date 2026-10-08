@@ -91,20 +91,18 @@ def _dish_info(item):
 
 
 def _reachable_restaurants(session):
-    """Open restaurants this visitor can order from: in range of their location, or all when no location is set."""
+    """Open restaurants in range of the visitor's location (Kannur until they choose), nearest first."""
     loc = location.get_location(session)
     restaurants = [add_delivery_info(r, loc) for r in Restaurant.objects.filter(is_open=True)]
-    if loc:
-        restaurants = sorted((r for r in restaurants if r.in_range), key=lambda r: r.distance)
+    restaurants = sorted((r for r in restaurants if r.in_range), key=lambda r: r.distance)
     return loc, restaurants
 
 
 def list_restaurants(session):
     loc, restaurants = _reachable_restaurants(session)
-    result = {"delivering_to": loc["label"] if loc else None,
-              "restaurants": [_restaurant_info(r) for r in restaurants]}
-    if not loc:
-        result["note"] = "No delivery location set, so distances and delivery times are unknown."
+    result = {"delivering_to": loc["label"], "restaurants": [_restaurant_info(r) for r in restaurants]}
+    if loc.get("is_default"):
+        result["note"] = "The customer has not set a location, so this is Kannur, the default."
     return result
 
 

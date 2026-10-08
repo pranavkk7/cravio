@@ -42,21 +42,10 @@ def restaurant_list(request):
             Q(name__icontains=query) | Q(cuisine__icontains=query) | Q(description__icontains=query) | Exists(dish_match)
         )
 
-    # The city tab: chosen explicitly, otherwise the city of the customer's location, otherwise all cities.
-    city_key = request.GET.get("city", loc["city"] if loc and loc["city"] else "all")
-    city = location.CITY_BY_KEY.get(city_key)
-    if city:
-        restaurants = restaurants.filter(area__in=[area.key for area in city.areas])
-
+    # Only the places that deliver to the customer's location (Kannur until they choose), nearest first.
     restaurants = [add_delivery_info(r, loc) for r in restaurants.order_by("name")]
-    if not loc:
-        # City by city, so the outlets of one chain are not all listed side by side.
-        city_order = {c.key: i for i, c in enumerate(location.CITIES)}
-        restaurants.sort(key=lambda r: city_order.get(r.city.key, len(city_order)) if r.city else len(city_order))
-    else:
-        # Places that deliver come first, nearest first; then the rest by distance.
-        far_away = float("inf")
-        restaurants.sort(key=lambda r: (not r.in_range, r.distance if r.distance is not None else far_away))
+    restaurants = sorted((r for r in restaurants if r.in_range), key=lambda r: r.distance)
+    city = location.CITY_BY_KEY.get(loc["city"])
 
     map_points = [
         {"name": r.name, "area": r.area_name, "lat": r.latitude, "lng": r.longitude,
@@ -69,7 +58,6 @@ def restaurant_list(request):
         "cities": location.CITIES,
         "city": city,
         "location": loc,
-        "nearby_count": sum(r.in_range for r in restaurants),
         "map_data": {"restaurants": map_points, "me": loc},
     })
 
@@ -96,9 +84,12 @@ def restaurant_detail(request, pk):
 
 @require_POST
 def set_location(request):
-    """Saves the delivery location from an area picked in the list, or from the browser's geolocation."""
+    """Saves the delivery location from a city tab, an area picked in the list, or the browser's geolocation."""
     city, area = location.find_area(request.POST.get("area", ""))
-    if area:
+    switch_to = location.CITY_BY_KEY.get(request.POST.get("city", ""))
+    if switch_to:
+        location.set_location(request.session, switch_to.lat, switch_to.lng, switch_to.name)
+    elif area:
         location.set_location(request.session, area.lat, area.lng, f"{area.name}, {city.name}")
     else:
         coordinates = location.parse_coordinates(request.POST.get("lat"), request.POST.get("lng"))

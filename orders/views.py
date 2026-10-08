@@ -78,7 +78,8 @@ def checkout(request):
     # The delivery location is checked again here; the cart page alone is not trusted.
     restaurant = get_object_or_404(Restaurant, pk=cart.data["restaurant"])
     loc = location.get_location(request.session)
-    if not loc:
+    if loc.get("is_default"):
+        # Kannur is only the starting view for browsing; a real order needs the customer's own location.
         messages.error(request, "Set your delivery location before checking out.")
         return redirect("orders:cart")
     if not restaurant.delivers_to(loc):

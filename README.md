@@ -6,7 +6,8 @@ A full-stack food delivery platform built with **Django** and **MySQL**. Custome
 see the restaurants that can deliver to them, sorted by distance with a delivery-time estimate. Vendors run
 their menu and orders, and admins see the whole platform. Role-based access control throughout,
 **Razorpay** checkout, an **OpenStreetMap** restaurant map, and a hand-built responsive design with no CSS
-framework.
+framework. Until a customer sets a location, Cravio
+shows Kannur, and only restaurants that deliver to the current location are listed.
 
 **[▶ Live demo](https://cravio-p4lw.onrender.com)** (deployed on Render from [`render.yaml`](render.yaml)). The free
 server sleeps when idle, so the first visit takes about 30 seconds. To try Ask Cravio there, paste **your own
@@ -84,7 +85,7 @@ Rahmath Hotel, Nahdi Mandi, KFC, Domino's, Pizza Hut, B.Laban, Odhen's and Megha
 - **Razorpay payments:** server-side order creation and signature verification. With no API keys it falls
   back to a clearly labelled simulated payment, so the whole flow can be demoed without real money
 - Redirects after cart and location actions only go to pages on this site (no open redirects)
-- 79 automated tests covering access control, distance and delivery-range rules, search, the cart,
+- 85 automated tests covering access control, distance and delivery-range rules, search, the cart,
   checkout, dashboards, the demo data, template filters and the AI assistant (its tools and agent loop are
   tested with a fake Claude client, so the tests need no API key and cost nothing)
 

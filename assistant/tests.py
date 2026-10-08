@@ -74,11 +74,11 @@ class AssistantTestData(TestCase):
 
 
 class ToolTests(AssistantTestData):
-    def test_list_restaurants_without_a_location_lists_everything_and_says_why(self):
+    def test_list_restaurants_without_a_location_uses_kannur_and_says_so(self):
         result = tools.list_restaurants(self.session)
-        self.assertIsNone(result["delivering_to"])
-        self.assertEqual(len(result["restaurants"]), 3)
-        self.assertIn("No delivery location", result["note"])
+        self.assertEqual(result["delivering_to"], "Kannur")
+        self.assertEqual(result["restaurants"], [])  # the test outlets are in Bengaluru and Kozhikode
+        self.assertIn("Kannur, the default", result["note"])
 
     def test_list_restaurants_with_a_location_lists_only_reachable_ones_nearest_first(self):
         self.deliver_to("koramangala")

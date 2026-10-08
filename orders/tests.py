@@ -112,9 +112,11 @@ class CravioFlowTests(TestCase):
         self.assertEqual(order.status, Order.Status.PREPARING)
 
     # ---- delivery range ----
-    def test_checkout_needs_a_delivery_location(self):
+    def test_checkout_needs_the_customers_own_location_not_the_default(self):
         self.client.force_login(self.customer)
+        self._deliver_to("koramangala")
         self.client.post(reverse("orders:add", args=[self.item.pk]))
+        self.client.post(reverse("restaurants:clear_location"))  # back to the default, Kannur
         response = self.client.post(reverse("orders:checkout"), follow=True)
         self.assertEqual(Order.objects.count(), 0)
         self.assertContains(response, "Set your delivery location before checking out.")
@@ -152,6 +154,7 @@ class CravioFlowTests(TestCase):
         return self.client.session.get("cart", {"items": {}})["items"]
 
     def test_plus_and_minus_change_the_quantity_and_zero_removes_the_item(self):
+        self._deliver_to("koramangala")
         self.client.post(reverse("orders:add", args=[self.item.pk]))
         self.client.post(reverse("orders:update", args=[self.item.pk]), {"action": "inc"})
         self.assertEqual(self._cart()[str(self.item.pk)], 2)
@@ -164,6 +167,7 @@ class CravioFlowTests(TestCase):
         self.assertIsNone(self.client.session["cart"]["restaurant"])
 
     def test_quantity_is_capped(self):
+        self._deliver_to("koramangala")
         for _ in range(MAX_QUANTITY + 5):
             self.client.post(reverse("orders:add", args=[self.item.pk]))
         self.assertEqual(self._cart()[str(self.item.pk)], MAX_QUANTITY)
@@ -187,12 +191,14 @@ class CravioFlowTests(TestCase):
 
     def test_adding_from_another_restaurant_starts_a_new_cart(self):
         other_item = MenuItem.objects.create(restaurant=self.other_restaurant, name="Penne", price=Decimal("260.00"))
+        self._deliver_to("koramangala")
         self.client.post(reverse("orders:add", args=[self.item.pk]))
         self.client.post(reverse("orders:add", args=[other_item.pk]))
         self.assertEqual(self._cart(), {str(other_item.pk): 1})
 
     # ---- pages ----
     def test_cart_page_shows_lines_and_total(self):
+        self._deliver_to("koramangala")
         self.client.post(reverse("orders:add", args=[self.item.pk]))
         self.client.post(reverse("orders:add", args=[self.item.pk]))
         response = self.client.get(reverse("orders:cart"))

@@ -1020,22 +1020,27 @@ textarea {
   overflow-x: auto;
 }
 
-.city-tabs a {
+.city-tabs form {
   flex: none;
+  margin: 0;
+}
+
+.city-tabs button {
   padding: 9px 16px;
+  font: inherit;
   font-weight: 700;
   color: var(--text);
+  cursor: pointer;
   background: var(--surface);
   border: 1px solid var(--border-strong);
   border-radius: 999px;
 }
 
-.city-tabs a:hover {
-  text-decoration: none;
+.city-tabs button:hover {
   border-color: var(--primary);
 }
 
-.city-tabs a[aria-current] {
+.city-tabs button[aria-current] {
   color: #fff;
   background: var(--ink);
   border-color: var(--ink);
