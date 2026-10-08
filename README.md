@@ -8,7 +8,7 @@ their menu and orders, and admins see the whole platform. Role-based access cont
 **Razorpay** checkout, an **OpenStreetMap** restaurant map, and a hand-built responsive design with no CSS
 framework.
 
-**Live demo:** deployed on Render from [`render.yaml`](render.yaml) (link coming once it is live). The free
+**[▶ Live demo](https://cravio-p4lw.onrender.com)** (deployed on Render from [`render.yaml`](render.yaml)). The free
 server sleeps when idle, so the first visit takes about 30 seconds. To try Ask Cravio there, paste **your own
 Claude API key** in the chat panel: it stays in your browser tab, is sent only with your messages and is
 never stored on the server.
