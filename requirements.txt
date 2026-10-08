@@ -1,0 +1,4 @@
+Django>=5.2
+razorpay>=1.4
+anthropic>=1.11
+# mysqlclient>=2.2   # uncomment when using MySQL (DB_ENGINE=mysql)
