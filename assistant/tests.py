@@ -191,10 +191,36 @@ class AgentLoopTests(AssistantTestData):
 
 
 class AssistantPageTests(AssistantTestData):
-    def test_without_an_api_key_the_assistant_explains_it_is_not_set_up(self):
+    def test_without_any_api_key_the_visitor_is_asked_for_their_own(self):
         self.assertFalse(self.client.get(reverse("assistant:history")).json()["enabled"])
         response = self.client.post(reverse("assistant:chat"), {"message": "hi"})
-        self.assertEqual(response.status_code, 503)
+        self.assertEqual(response.status_code, 401)
+        self.assertTrue(response.json()["need_key"])
+
+    def test_a_visitor_key_is_used_for_their_request_and_never_stored(self):
+        key = "sk-ant-visitor-test-key-123456"
+        client = FakeClient(text("Try the chicken biryani!"))
+        with mock.patch.object(agent, "client_for", return_value=client) as made:
+            response = self.client.post(reverse("assistant:chat"), {"message": "biryani?"}, HTTP_X_ANTHROPIC_KEY=key)
+        self.assertEqual(response.json()["reply"], "Try the chicken biryani!")
+        made.assert_called_once_with(key)
+        session = self.client.session
+        self.assertNotIn(key, json.dumps({k: session[k] for k in session.keys()}, default=str))
+
+    def test_a_badly_shaped_visitor_key_is_refused_before_any_api_call(self):
+        with mock.patch.object(agent, "client_for") as made:
+            response = self.client.post(reverse("assistant:chat"), {"message": "hi"}, HTTP_X_ANTHROPIC_KEY="hello")
+        self.assertEqual(response.status_code, 400)
+        self.assertTrue(response.json()["need_key"])
+        made.assert_not_called()
+
+    def test_a_rejected_visitor_key_asks_for_another(self):
+        request = httpx2.Request("POST", "https://api.anthropic.com/v1/messages")
+        error = anthropic.AuthenticationError("invalid x-api-key", response=httpx2.Response(401, request=request), body=None)
+        with mock.patch.object(agent, "client_for", return_value=FakeClient(error)):
+            response = self.client.post(reverse("assistant:chat"), {"message": "hi"}, HTTP_X_ANTHROPIC_KEY="sk-ant-wrong-key-1234567890")
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.json(), {"error": "That Claude API key was not accepted. Check it and try again.", "need_key": True})
 
     @override_settings(ANTHROPIC_API_KEY="test-key")
     def test_chat_endpoint_returns_the_reply_and_the_new_cart_count(self):

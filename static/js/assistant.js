@@ -1,5 +1,7 @@
 // Ask Cravio: the chat panel. The server does all the AI work (assistant/agent.py); this only sends the
 // customer's message, shows the reply, and keeps the cart badge in the nav up to date.
+// On the public demo the server has no API key, so visitors can use their own: it is kept in
+// sessionStorage (this tab only) and sent in a header with each message, never stored server-side.
 const root = document.querySelector('[data-assistant]')
 
 if (root) {
@@ -9,9 +11,29 @@ if (root) {
   const form = root.querySelector('[data-ask-form]')
   const input = form.elements.message
   const suggestions = root.querySelector('[data-ask-suggestions]')
+  const keyForm = root.querySelector('[data-ask-key]')
+  const forget = root.querySelector('[data-ask-forget]')
   const OPEN_KEY = 'cravio.assistant.open'
+  const API_KEY = 'cravio.assistant.apiKey'
   let loaded = false
   let busy = false
+  let serverHasKey = true
+
+  const storedKey = () => { try { return sessionStorage.getItem(API_KEY) || '' } catch { return '' } }
+  const storeKey = (key) => {
+    try { key ? sessionStorage.setItem(API_KEY, key) : sessionStorage.removeItem(API_KEY) } catch {}
+    forget.hidden = !key
+  }
+
+  // Swap the message box for the key form, or back.
+  const askForKey = (show) => {
+    keyForm.hidden = !show
+    form.hidden = show
+    if (show) {
+      suggestions.hidden = true
+      keyForm.elements.key.focus()
+    }
+  }
 
   const remember = (open) => { try { sessionStorage.setItem(OPEN_KEY, open ? '1' : '') } catch {} }
 
@@ -48,14 +70,11 @@ if (root) {
     loaded = true
     try {
       const data = await (await fetch(root.dataset.historyUrl, { headers: { Accept: 'application/json' } })).json()
-      if (!data.enabled) {
-        add('error', 'The AI assistant is not set up on this server yet (it needs an Anthropic API key).')
-        form.hidden = true
-        suggestions.hidden = true
-        return
-      }
+      serverHasKey = data.enabled
       data.messages.forEach((m) => add(m.role, m.text))
       if (data.messages.length) suggestions.hidden = true
+      forget.hidden = !storedKey()
+      if (!serverHasKey && !storedKey()) askForKey(true)
     } catch {
       add('error', 'Could not load the chat. Please refresh the page.')
     }
@@ -83,11 +102,17 @@ if (root) {
     try {
       const body = new FormData(form)
       body.set('message', text)
-      const response = await fetch(root.dataset.chatUrl, { method: 'POST', body, headers: { Accept: 'application/json' } })
+      const headers = { Accept: 'application/json' }
+      if (storedKey()) headers['X-Anthropic-Key'] = storedKey()
+      const response = await fetch(root.dataset.chatUrl, { method: 'POST', body, headers })
       const data = await response.json()
       typing.remove()
       if (!response.ok) {
         add('error', data.error || 'Something went wrong. Please try again.')
+        if (data.need_key) {
+          storeKey('')
+          askForKey(true)
+        }
       } else {
         const link = data.cart_changed ? `<a class="ask-cart-link" href="${root.dataset.cartUrl}">View cart and pay →</a>` : ''
         add('assistant', data.reply, link)
@@ -101,6 +126,26 @@ if (root) {
       input.focus()
     }
   }
+
+  keyForm.addEventListener('submit', (event) => {
+    event.preventDefault()
+    const key = keyForm.elements.key.value.trim()
+    if (!key.startsWith('sk-ant-')) {
+      add('error', "That doesn't look like a Claude API key. It starts with sk-ant-.")
+      return
+    }
+    keyForm.reset()
+    storeKey(key)
+    askForKey(false)
+    suggestions.hidden = log.querySelectorAll('.ask-msg.user').length > 0
+    add('assistant', 'Key saved for this tab. What are you craving?')
+    input.focus()
+  })
+  forget.addEventListener('click', () => {
+    storeKey('')
+    add('assistant', 'Your API key is removed from this tab.')
+    if (!serverHasKey) askForKey(true)
+  })
 
   root.querySelectorAll('[data-ask-toggle]').forEach((button) => button.addEventListener('click', () => toggle(panel.hidden)))
   form.addEventListener('submit', (event) => {

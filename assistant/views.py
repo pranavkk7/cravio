@@ -15,6 +15,11 @@ def _customers_only(view):
     return wrapper
 
 
+# Visitors may bring their own Claude API key. The browser keeps it for the tab and sends it in this
+# header with each chat message; the server uses it for that request and never stores it.
+KEY_HEADER = "HTTP_X_ANTHROPIC_KEY"
+
+
 @require_GET
 @_customers_only
 def history(request):
@@ -24,13 +29,17 @@ def history(request):
 @require_POST
 @_customers_only
 def chat(request):
-    if not agent.is_enabled():
-        return JsonResponse({"error": "The AI assistant is not set up on this server (no ANTHROPIC_API_KEY)."}, status=503)
+    try:
+        key = agent.visitor_key(request.META.get(KEY_HEADER))
+    except agent.AssistantError as error:
+        return JsonResponse({"error": str(error), "need_key": True}, status=400)
+    if not key and not agent.is_enabled():
+        return JsonResponse({"error": "Add your Claude API key to chat with Ask Cravio.", "need_key": True}, status=401)
     cart_before = len(Cart(request.session))
     try:
-        answer = agent.reply(request.session, request.POST.get("message", ""))
+        answer = agent.reply(request.session, request.POST.get("message", ""), client=agent.client_for(key) if key else None)
     except agent.AssistantError as error:
-        return JsonResponse({"error": str(error)}, status=400)
+        return JsonResponse({"error": str(error), "need_key": isinstance(error, agent.KeyProblem)}, status=400)
     cart_count = len(Cart(request.session))
     return JsonResponse({"reply": answer, "cart_count": cart_count, "cart_changed": cart_count != cart_before})
 

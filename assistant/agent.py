@@ -37,7 +37,7 @@ Write short, friendly plain text (under 90 words): no tables or headings. You ma
 **bold**. The restaurants are real brands used as demo data; prices are approximate."""
 
 FRIENDLY_ERRORS = {
-    anthropic.AuthenticationError: "The AI assistant's API key is not valid. Please check the server settings.",
+    anthropic.AuthenticationError: "That Claude API key was not accepted. Check it and try again.",
     anthropic.RateLimitError: "The assistant is busy right now. Please try again in a minute.",
     anthropic.APIConnectionError: "The assistant could not reach the AI service. Please try again.",
 }
@@ -47,7 +47,12 @@ class AssistantError(Exception):
     """A problem to show the customer as a friendly message."""
 
 
+class KeyProblem(AssistantError):
+    """The API key was refused or its account has no credit: the visitor should enter another key."""
+
+
 def is_enabled():
+    """True when the server has its own key. Without one, visitors can bring their own (see client_for)."""
     return bool(settings.ANTHROPIC_API_KEY)
 
 
@@ -59,6 +64,22 @@ def get_client():
     if _client is None:
         _client = anthropic.Anthropic(api_key=settings.ANTHROPIC_API_KEY, timeout=60.0, max_retries=2)
     return _client
+
+
+def visitor_key(raw):
+    """Checks the shape of a key a visitor pasted in. The key is used for their request only: it is
+    never written to the session, the database or the logs."""
+    key = (raw or "").strip()
+    if not key:
+        return ""
+    if not key.startswith("sk-ant-") or not 20 <= len(key) <= 300 or any(c.isspace() for c in key):
+        raise AssistantError("That doesn't look like a Claude API key. It starts with sk-ant-.")
+    return key
+
+
+def client_for(key):
+    """A client that bills the visitor's own Anthropic account, made fresh for this one request."""
+    return anthropic.Anthropic(api_key=key, timeout=60.0, max_retries=1)
 
 
 def conversation(session):
@@ -134,6 +155,10 @@ def reply(session, user_text, client=None):
             history.append({"role": "user", "content": results})
     except anthropic.APIError as error:
         message = next((text for kind, text in FRIENDLY_ERRORS.items() if isinstance(error, kind)), None)
+        if "credit balance" in str(error).lower():
+            raise KeyProblem("That Anthropic account has no credit left. Add credit in the Anthropic console and try again.") from error
+        if isinstance(error, (anthropic.AuthenticationError, anthropic.PermissionDeniedError)):
+            raise KeyProblem(message or "That Claude API key cannot be used. Check it and try again.") from error
         raise AssistantError(message or "Something went wrong with the assistant. Please try again.") from error
 
     session[SESSION_KEY] = history
