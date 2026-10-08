@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% load cravio_extras %}
+{% block title %}Admin dashboard - Cravio{% endblock %}
+
+{% block content %}
+<div class="page-head">
+  <div>
+    <h1>Platform overview</h1>
+    <p class="muted">Everything happening on Cravio at a glance.</p>
+  </div>
+  <a class="btn btn-outline btn-sm" href="{% url 'admin:index' %}">Open Django admin</a>
+</div>
+
+<div class="stats">
+  <div class="stat"><span class="stat-icon green"><svg class="icon"><use href="#i-wallet"/></svg></span><div><div class="stat-value">{{ revenue|inr }}</div><div class="stat-label">Total revenue</div></div></div>
+  <div class="stat"><span class="stat-icon blue"><svg class="icon"><use href="#i-receipt"/></svg></span><div><div class="stat-value">{{ order_count }}</div><div class="stat-label">Paid orders</div></div></div>
+  <div class="stat"><span class="stat-icon"><svg class="icon"><use href="#i-store"/></svg></span><div><div class="stat-value">{{ restaurant_count }}</div><div class="stat-label">Restaurants</div></div></div>
+  <div class="stat"><span class="stat-icon amber"><svg class="icon"><use href="#i-users"/></svg></span><div><div class="stat-value">{{ user_count }}</div><div class="stat-label">Users ({{ customer_count }} customers, {{ vendor_count }} vendors)</div></div></div>
+</div>
+
+<section class="section">
+  <div class="section-head">
+    <h2>Latest orders</h2>
+    <span class="muted small">Most recent 20</span>
+  </div>
+  {% if orders %}
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Order</th><th>Customer</th><th>Restaurant</th><th class="num">Total</th><th>Status</th></tr></thead>
+      <tbody>
+        {% for o in orders %}
+        <tr>
+          <td><b>#{{ o.pk }}</b><div class="muted small">{{ o.created_at|date:"j M, g:i A" }}</div></td>
+          <td>{{ o.customer }}</td>
+          <td>{{ o.restaurant }}</td>
+          <td class="num"><b>{{ o.total|inr }}</b></td>
+          <td>
+            {% if o.status == 'pending_payment' %}<span class="badge badge-warning">{{ o.get_status_display }}</span>
+            {% elif o.status == 'delivered' %}<span class="badge badge-success">{{ o.get_status_display }}</span>
+            {% else %}<span class="badge badge-info">{{ o.get_status_display }}</span>{% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="empty">
+    <div class="empty-icon"><svg class="icon"><use href="#i-receipt"/></svg></div>
+    <h3>No orders yet</h3>
+    <p class="muted">Orders will show up here once customers start checking out.</p>
+  </div>
+  {% endif %}
+</section>
+{% endblock %}

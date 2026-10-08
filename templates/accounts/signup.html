@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}Sign up - Cravio{% endblock %}
+
+{% block content %}
+<div class="auth">
+  <aside class="auth-side">
+    <h2>Join Cravio</h2>
+    <p>One account, two ways to use it.</p>
+    <ul class="auth-points">
+      <li><svg class="icon"><use href="#i-bag"/></svg> <span><b>Customer:</b> order from local restaurants and track every order</span></li>
+      <li><svg class="icon"><use href="#i-store"/></svg> <span><b>Vendor:</b> list your restaurant, manage the menu and handle orders</span></li>
+    </ul>
+  </aside>
+  <div class="auth-form">
+    <h1>Create an account</h1>
+    <p class="muted">It takes less than a minute.</p>
+    <form method="post" novalidate>{% csrf_token %}
+      {% include "_form_fields.html" %}
+      <button class="btn btn-primary btn-block">Sign up</button>
+    </form>
+    <p class="muted auth-alt">Already have an account? <a href="{% url 'accounts:login' %}">Log in</a></p>
+  </div>
+</div>
+{% endblock %}
