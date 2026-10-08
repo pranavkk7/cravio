@@ -8,6 +8,19 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.environ.get("SECRET_KEY", "dev-only-insecure-key-change-me")
 DEBUG = os.environ.get("DEBUG", "1") == "1"
 ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", "localhost,127.0.0.1").split(",")
+CSRF_TRUSTED_ORIGINS = [o for o in os.environ.get("CSRF_TRUSTED_ORIGINS", "").split(",") if o]
+
+# Render sets RENDER_EXTERNAL_HOSTNAME (e.g. cravio.onrender.com): trust it without extra settings.
+RENDER_HOST = os.environ.get("RENDER_EXTERNAL_HOSTNAME")
+if RENDER_HOST:
+    ALLOWED_HOSTS.append(RENDER_HOST)
+    CSRF_TRUSTED_ORIGINS.append(f"https://{RENDER_HOST}")
+
+if not DEBUG:
+    # Behind Render's HTTPS proxy: trust its header and keep cookies on HTTPS only.
+    SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -24,6 +37,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware",  # static files in production
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -92,6 +106,12 @@ STATIC_URL = "static/"
 # The site's own CSS and images live in the project-level "static" folder.
 STATICFILES_DIRS = [BASE_DIR / "static"]
 STATIC_ROOT = BASE_DIR / "staticfiles"  # where `collectstatic` gathers files for deployment
+if not DEBUG:
+    # Compressed files with content hashes in their names, so browsers can cache them for good.
+    STORAGES = {
+        "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
+        "staticfiles": {"BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage"},
+    }
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 # Razorpay (use TEST keys from the Razorpay dashboard). Without keys, checkout falls back to a
@@ -99,8 +119,8 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 RAZORPAY_KEY_ID = os.environ.get("RAZORPAY_KEY_ID", "")
 RAZORPAY_KEY_SECRET = os.environ.get("RAZORPAY_KEY_SECRET", "")
 
-# Ask Cravio, the AI ordering assistant (Claude API). The key stays on the server; without it the chat
-# button explains that the assistant is not set up.
+# Ask Cravio, the AI ordering assistant (Claude API). The key stays on the server; without it (as on the
+# public demo) visitors can chat with their own key, which is never stored.
 ANTHROPIC_API_KEY = os.environ.get("ANTHROPIC_API_KEY", "")
 CRAVIO_AI_MODEL = os.environ.get("CRAVIO_AI_MODEL", "claude-opus-5-5")
 CRAVIO_AI_EFFORT = os.environ.get("CRAVIO_AI_EFFORT", "low")  # chat replies; low keeps them quick and cheap

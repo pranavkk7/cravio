@@ -8,6 +8,11 @@ their menu and orders, and admins see the whole platform. Role-based access cont
 **Razorpay** checkout, an **OpenStreetMap** restaurant map, and a hand-built responsive design with no CSS
 framework.
 
+**Live demo:** deployed on Render from [`render.yaml`](render.yaml) (link coming once it is live). The free
+server sleeps when idle, so the first visit takes about 30 seconds. To try Ask Cravio there, paste **your own
+Claude API key** in the chat panel: it stays in your browser tab, is sent only with your messages and is
+never stored on the server.
+
 **Ask Cravio** is a built-in AI ordering assistant powered by the **Claude API with tool use**: tell it
 "biryani under ₹300 that reaches me in 30 minutes" and it searches the real menus, checks delivery range,
 and adds dishes to your cart, while checkout always stays with the customer.

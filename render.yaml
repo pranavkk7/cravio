@@ -1,0 +1,19 @@
+# Render blueprint for the public demo: New > Blueprint > pick this repo > Apply.
+# The free plan sleeps when idle (the first visit then takes about 30 seconds) and its disk is
+# temporary, so the demo database is rebuilt and reseeded every time the service starts.
+services:
+  - type: web
+    name: cravio
+    runtime: python
+    plan: free
+    buildCommand: pip install -r requirements.txt && python manage.py collectstatic --noinput
+    startCommand: python manage.py migrate --noinput && python manage.py seed_demo && gunicorn config.wsgi --workers 2 --timeout 120
+    healthCheckPath: /
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.12.8
+      - key: DEBUG
+        value: "0"
+      - key: SECRET_KEY
+        generateValue: true
+      # No ANTHROPIC_API_KEY on purpose: visitors use their own key in the chat panel.
