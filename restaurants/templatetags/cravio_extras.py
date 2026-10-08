@@ -57,6 +57,13 @@ def initial(name):
 
 
 @register.filter
+def monogram(name):
+    """Up to two initials of a dish name, for the tile shown when a dish has no photo: "Peppy Paneer" -> "PP"."""
+    words = [w for w in str(name or "").replace("(", " ").split() if w[:1].isalpha()]
+    return "".join(w[0] for w in words[:2]).upper() or "?"
+
+
+@register.filter
 def km(distance):
     """A friendly distance: 0.45 -> "450 m", 3.24 -> "3.2 km", 27.6 -> "28 km"."""
     try:

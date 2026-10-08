@@ -15,7 +15,7 @@
   <div class="card">
     {% for l in lines %}
     <div class="line">
-      {% if l.item.image %}<img class="menu-photo" src="{% static l.item.image %}" alt="" loading="lazy">{% else %}<span class="menu-tile" aria-hidden="true">{{ l.item.name|initial }}</span>{% endif %}
+      {% if l.item.image %}<img class="menu-photo" src="{% static l.item.image %}" alt="" loading="lazy">{% else %}<span class="menu-tile" aria-hidden="true">{{ l.item.name|monogram }}</span>{% endif %}
       <div class="line-info">
         <h3>{{ l.item.name }}</h3>
         <p class="muted small">{{ l.item.price|inr }} each</p>

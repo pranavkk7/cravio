@@ -20,11 +20,11 @@ BRANDS = {
         "cover": "biryani",
         "menu": [
             ("Biryani", "Malabar Chicken Biryani", "Jeerakasala rice layered with spiced chicken", "280", False, "biryani"),
-            ("Biryani", "Mutton Biryani", "Slow-cooked mutton, ghee rice and fried onions", "390", False, "biryani"),
-            ("Biryani", "Prawns Biryani", "Malabar prawns dum-cooked with jeerakasala rice", "380", False, "biryani"),
+            ("Biryani", "Mutton Biryani", "Slow-cooked mutton, ghee rice and fried onions", "390", False, "biryani-2"),
+            ("Biryani", "Prawns Biryani", "Malabar prawns dum-cooked with jeerakasala rice", "380", False, "biryani-3"),
             ("Kerala mains", "Fish Mango Curry", "Fish simmered in coconut milk with raw mango", "260", False, "fish-curry"),
             ("Kerala mains", "Mutton Varattiyathu", "Mutton roasted dry with shallots and pepper", "360", False, "curry"),
-            ("Kerala mains", "Chicken Stew", "Mild coconut milk stew, perfect with appam", "180", False, "curry"),
+            ("Kerala mains", "Chicken Stew", "Mild coconut milk stew, perfect with appam", "180", False, ""),
             ("Kerala mains", "Koonthal Ularthiyathu", "Squid stir-fried with coconut slivers", "320", False, "seafood"),
             ("Kerala mains", "Kozhi Porichathu", "Malabar-style fried chicken", "260", False, "fried-chicken"),
             ("Breads", "Appam (2 pcs)", "Lacy rice hoppers with soft centres", "40", True, "appam"),
@@ -41,8 +41,8 @@ BRANDS = {
         "cover": "biryani-2",
         "menu": [
             ("Biryani", "Beef Biryani", "The house special: tender beef and fragrant rice", "220", False, "biryani-2"),
-            ("Biryani", "Chicken Biryani", "Malabar-style with jeerakasala rice", "200", False, "biryani-2"),
-            ("Biryani", "Mutton Biryani", "Rich, slow-cooked mutton biryani", "300", False, "biryani-2"),
+            ("Biryani", "Chicken Biryani", "Malabar-style with jeerakasala rice", "200", False, "biryani"),
+            ("Biryani", "Mutton Biryani", "Rich, slow-cooked mutton biryani", "300", False, "biryani-3"),
             ("Sides", "Beef Fry", "Beef roasted with coconut bits and curry leaves", "160", False, "curry"),
             ("Sides", "Chicken Fry", "Crispy, spicy fried chicken", "170", False, "fried-chicken"),
             ("Sides", "Porotta", "Flaky layered flatbread", "15", True, "porotta"),
@@ -57,11 +57,11 @@ BRANDS = {
         "cover": "mandi",
         "menu": [
             ("Mandi", "Chicken Kuzhi Mandi (Quarter)", "Pit-cooked chicken on fragrant mandi rice", "300", False, "mandi"),
-            ("Mandi", "Chicken Kuzhi Mandi (Half)", "Serves two, with salad and sauces", "560", False, "mandi"),
+            ("Mandi", "Chicken Kuzhi Mandi (Half)", "Serves two, with salad and sauces", "560", False, ""),
             ("Mandi", "Al Faham Mandi (Quarter)", "Charcoal-grilled chicken on mandi rice", "330", False, "al-faham"),
-            ("Mandi", "Al Faham Mandi (Half)", "Serves two, with salad and sauces", "600", False, "al-faham"),
-            ("Mandi", "Fil Fil Al Faham Mandi", "Pepper-spiced al faham on mandi rice", "340", False, "al-faham"),
-            ("Mandi", "Mutton Mandi (Quarter)", "Slow-cooked mutton on mandi rice", "460", False, "mandi"),
+            ("Mandi", "Al Faham Mandi (Half)", "Serves two, with salad and sauces", "600", False, ""),
+            ("Mandi", "Fil Fil Al Faham Mandi", "Pepper-spiced al faham on mandi rice", "340", False, ""),
+            ("Mandi", "Mutton Mandi (Quarter)", "Slow-cooked mutton on mandi rice", "460", False, ""),
             ("Sides", "Hummus with Kubboos", "Creamy chickpea dip and Arabic bread", "140", True, "hummus"),
             ("Sides", "Garlic Mayonnaise", "The classic mandi dip", "30", False, ""),
             ("Drinks", "Lime Mint Cooler", "Fresh lime blended with mint", "90", True, "lime-mint"),
@@ -75,11 +75,11 @@ BRANDS = {
         "cover": "fried-chicken",
         "menu": [
             ("Chicken", "Hot & Crispy Chicken (2 pc)", "Spicy, crunchy bone-in chicken", "229", False, "fried-chicken"),
-            ("Chicken", "Chicken Bucket (8 pc)", "Eight pieces to share", "659", False, "fried-chicken"),
-            ("Chicken", "Chicken Popcorn (Medium)", "Bite-sized boneless chicken", "179", False, "fried-chicken"),
-            ("Chicken", "Chicken Strips (3 pc)", "Tender boneless strips", "169", False, "fried-chicken"),
+            ("Chicken", "Chicken Bucket (8 pc)", "Eight pieces to share", "659", False, ""),
+            ("Chicken", "Chicken Popcorn (Medium)", "Bite-sized boneless chicken", "179", False, "chicken-65"),
+            ("Chicken", "Chicken Strips (3 pc)", "Tender boneless strips", "169", False, ""),
             ("Burgers", "Classic Zinger Burger", "Crispy chicken fillet, lettuce and mayo", "199", False, "burger"),
-            ("Burgers", "Veg Zinger Burger", "Crispy veg patty with lettuce and mayo", "159", True, "burger"),
+            ("Burgers", "Veg Zinger Burger", "Crispy veg patty with lettuce and mayo", "159", True, ""),
             ("Sides and drinks", "French Fries (Medium)", "Salted and crisp", "119", True, "fries"),
             ("Sides and drinks", "Pepsi (475 ml)", "Chilled soft drink", "69", True, "cola"),
         ],
@@ -92,12 +92,12 @@ BRANDS = {
         "cover": "pizza",
         "menu": [
             ("Pizzas (medium)", "Margherita", "Classic cheese and tomato", "299", True, "pizza"),
-            ("Pizzas (medium)", "Farmhouse", "Onion, capsicum, tomato and mushroom", "459", True, "pizza"),
-            ("Pizzas (medium)", "Peppy Paneer", "Paneer, capsicum and red paprika", "459", True, "pizza"),
-            ("Pizzas (medium)", "Chicken Golden Delight", "Barbeque chicken, golden corn and extra cheese", "499", False, "pizza"),
-            ("Pizzas (medium)", "Chicken Dominator", "Loaded with five kinds of chicken", "599", False, "pizza"),
+            ("Pizzas (medium)", "Farmhouse", "Onion, capsicum, tomato and mushroom", "459", True, "pizza-2"),
+            ("Pizzas (medium)", "Peppy Paneer", "Paneer, capsicum and red paprika", "459", True, ""),
+            ("Pizzas (medium)", "Chicken Golden Delight", "Barbeque chicken, golden corn and extra cheese", "499", False, ""),
+            ("Pizzas (medium)", "Chicken Dominator", "Loaded with five kinds of chicken", "599", False, ""),
             ("Sides", "Garlic Breadsticks", "Baked with garlic butter and herbs", "129", True, "garlic-bread"),
-            ("Sides", "Stuffed Garlic Bread", "Filled with cheese and sweet corn", "169", True, "garlic-bread"),
+            ("Sides", "Stuffed Garlic Bread", "Filled with cheese and sweet corn", "169", True, ""),
             ("Desserts", "Choco Lava Cake", "Warm cake with a molten chocolate centre", "109", True, "lava-cake"),
         ],
     },
@@ -109,10 +109,10 @@ BRANDS = {
         "cover": "pizza-2",
         "menu": [
             ("Pan pizzas (medium)", "Margherita", "Mozzarella and tangy tomato sauce", "349", True, "pizza-2"),
-            ("Pan pizzas (medium)", "Veggie Supreme", "Onion, capsicum, mushroom, olives and corn", "489", True, "pizza-2"),
-            ("Pan pizzas (medium)", "Tandoori Paneer", "Tandoori paneer, onion and capsicum", "499", True, "pizza-2"),
-            ("Pan pizzas (medium)", "Chicken Tikka", "Chicken tikka with onion and capsicum", "529", False, "pizza-2"),
-            ("Pan pizzas (medium)", "Chicken Supreme", "Three kinds of chicken with olives", "569", False, "pizza-2"),
+            ("Pan pizzas (medium)", "Veggie Supreme", "Onion, capsicum, mushroom, olives and corn", "489", True, "pizza"),
+            ("Pan pizzas (medium)", "Tandoori Paneer", "Tandoori paneer, onion and capsicum", "499", True, ""),
+            ("Pan pizzas (medium)", "Chicken Tikka", "Chicken tikka with onion and capsicum", "529", False, ""),
+            ("Pan pizzas (medium)", "Chicken Supreme", "Three kinds of chicken with olives", "569", False, ""),
             ("Pasta and sides", "Creamy Tomato Pasta", "Penne in a creamy tomato sauce", "199", True, "pasta"),
             ("Pasta and sides", "Garlic Bread", "Toasted with garlic butter", "149", True, "garlic-bread"),
             ("Pasta and sides", "Pepsi (475 ml)", "Chilled soft drink", "69", True, "cola"),
@@ -126,12 +126,12 @@ BRANDS = {
         "cover": "kunafa",
         "menu": [
             ("Signatures", "Salankatia Mango", "Layers of cream, cake and fresh mango", "280", True, "mango-dessert"),
-            ("Signatures", "Salankatia Pistachio", "Cream and cake with pistachio sauce", "320", True, "kunafa"),
-            ("Signatures", "Ambalyh Mango", "Rice pudding crowned with mango", "300", True, "mango-dessert"),
+            ("Signatures", "Salankatia Pistachio", "Cream and cake with pistachio sauce", "320", True, ""),
+            ("Signatures", "Ambalyh Mango", "Rice pudding crowned with mango", "300", True, ""),
             ("Signatures", "Kunafa Pistachio", "Crisp kunafa with pistachio cream", "340", True, "kunafa"),
             ("Umm Ali and more", "Umm Ali (Plain)", "Warm Egyptian bread pudding with nuts", "220", True, "dessert"),
-            ("Umm Ali and more", "Crispy Umm Ali Lotus", "Umm Ali with Lotus biscuit crumble", "290", True, "dessert"),
-            ("Umm Ali and more", "Koushiri Nutella", "Layered rice pudding with Nutella", "260", True, "dessert"),
+            ("Umm Ali and more", "Crispy Umm Ali Lotus", "Umm Ali with Lotus biscuit crumble", "290", True, ""),
+            ("Umm Ali and more", "Koushiri Nutella", "Layered rice pudding with Nutella", "260", True, ""),
         ],
     },
     "odhens": {
@@ -144,10 +144,10 @@ BRANDS = {
             ("Meals", "Fish Meals", "Kerala rice with fish curry, thoran and pickle", "130", False, "fish-meals"),
             ("Meals", "Veg Meals", "Kerala rice with sambar, thoran and pickle", "90", True, "meals"),
             ("Seafood fries", "Ayala Fry (Mackerel)", "Masala-coated and pan-fried", "90", False, "fish-fry"),
-            ("Seafood fries", "Mathi Fry (Sardine)", "Crisp fried sardines", "60", False, "fish-fry"),
-            ("Seafood fries", "Kallummakkaya Fry (Mussels)", "A Malabar coast speciality", "160", False, "seafood"),
+            ("Seafood fries", "Mathi Fry (Sardine)", "Crisp fried sardines", "60", False, ""),
+            ("Seafood fries", "Kallummakkaya Fry (Mussels)", "A Malabar coast speciality", "160", False, ""),
             ("Seafood fries", "Koonthal Fry (Squid)", "Spicy fried squid rings", "200", False, "seafood"),
-            ("Seafood fries", "Prawns Roast", "Prawns roasted with onion and spices", "240", False, "seafood"),
+            ("Seafood fries", "Prawns Roast", "Prawns roasted with onion and spices", "240", False, "curry"),
         ],
     },
     "meghana": {
@@ -158,12 +158,12 @@ BRANDS = {
         "cover": "biryani-3",
         "menu": [
             ("Biryani", "Chicken Boneless Biryani", "The bestseller: spicy boneless chicken biryani", "360", False, "biryani-3"),
-            ("Biryani", "Meghana Special Chicken Biryani", "Loaded with extra chicken pieces", "390", False, "biryani-3"),
-            ("Biryani", "Mutton Biryani", "Andhra-style mutton biryani", "420", False, "biryani-3"),
-            ("Biryani", "Paneer Biryani", "Paneer cubes in spiced biryani rice", "320", True, "biryani-3"),
-            ("Biryani", "Veg Biryani", "Mixed vegetable biryani", "270", True, "biryani-3"),
+            ("Biryani", "Meghana Special Chicken Biryani", "Loaded with extra chicken pieces", "390", False, "biryani"),
+            ("Biryani", "Mutton Biryani", "Andhra-style mutton biryani", "420", False, "biryani-2"),
+            ("Biryani", "Paneer Biryani", "Paneer cubes in spiced biryani rice", "320", True, ""),
+            ("Biryani", "Veg Biryani", "Mixed vegetable biryani", "270", True, ""),
             ("Starters", "Chicken 65", "Deep-fried chicken with curry leaves", "300", False, "chicken-65"),
-            ("Starters", "Andhra Chilli Chicken", "Fiery green chilli chicken", "320", False, "chicken-65"),
+            ("Starters", "Andhra Chilli Chicken", "Fiery green chilli chicken", "320", False, "curry"),
         ],
     },
 }
@@ -190,7 +190,10 @@ OUTLETS = [
 
 
 def photo(key):
-    """The static path of a food photo, or "" when that photo is not in the project."""
+    """The static path of a food photo, or "" when that photo is not in the project.
+
+    Each photo is used at most once per restaurant, so no menu shows the same picture twice; dishes
+    without a fitting photo get "" and the menu shows a tile instead."""
     path = f"img/food/{key}.jpg"
     return path if key and finders.find(path) else ""
 

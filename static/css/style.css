@@ -1424,17 +1424,22 @@ textarea {
   box-shadow: var(--shadow-sm);
 }
 
+/* Shown when a dish has no photo of its own: initials on a warm gradient, the same size as a photo. */
 .menu-tile {
   display: grid;
   place-items: center;
   flex: none;
-  width: 64px;
-  height: 64px;
-  font-size: 1.6rem;
+  width: 76px;
+  height: 76px;
+  font-size: 1.35rem;
   font-weight: 800;
+  letter-spacing: 0.04em;
   color: var(--primary-dark);
-  background: var(--primary-soft);
-  border-radius: 18px;
+  background:
+    radial-gradient(circle at 30% 25%, rgba(255, 255, 255, 0.75), transparent 55%),
+    linear-gradient(135deg, var(--primary-soft), #fff1d6);
+  border: 1px solid var(--border);
+  border-radius: 16px;
 }
 
 .menu-info {

@@ -102,6 +102,18 @@ class RestaurantPagesTests(TestCase):
         self.assertContains(response, "₹150")
         self.assertNotContains(response, "Secret Special")
 
+    def test_a_photo_appears_only_once_per_menu(self):
+        MenuItem.objects.filter(restaurant=self.spice).update(image="img/food/curry.jpg")
+        response = self.client.get(reverse("restaurants:detail", args=[self.spice.pk]))
+        self.assertEqual(response.content.decode().count("img/food/curry"), 1)
+        self.assertContains(response, 'class="menu-tile"')
+
+    def test_dishes_without_a_photo_get_their_initials(self):
+        from restaurants.templatetags.cravio_extras import monogram
+        self.assertEqual(monogram("Peppy Paneer"), "PP")
+        self.assertEqual(monogram("Chicken Bucket (8 pc)"), "CB")
+        self.assertEqual(monogram(""), "?")
+
     def test_menu_shows_quantity_and_cart_bar_for_items_in_the_cart(self):
         self.client.post(reverse("orders:add", args=[self.tikka.pk]))
         self.client.post(reverse("orders:add", args=[self.tikka.pk]))

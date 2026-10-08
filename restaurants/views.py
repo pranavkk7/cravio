@@ -68,8 +68,12 @@ def restaurant_detail(request, pk):
     items = list(restaurant.items.filter(is_available=True))
     # Menu sections in the order they first appear, so a vendor's newest section goes last.
     sections = {}
+    shown_photos = set()
     for item in items:
         item.in_cart = cart.quantity(item.pk)
+        # A photo appears once per menu; a later dish with the same photo gets a tile instead.
+        item.photo = item.image if item.image and item.image not in shown_photos else ""
+        shown_photos.add(item.image)
         sections.setdefault(item.category or "Menu", []).append(item)
     return render(request, "restaurants/detail.html", {
         "restaurant": restaurant,

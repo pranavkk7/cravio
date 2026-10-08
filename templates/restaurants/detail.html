@@ -52,10 +52,10 @@
     <div class="menu-grid">
       {% for item in section_items %}
       <article class="menu-card">
-        {% if item.image %}
-          <img class="menu-photo" src="{% static item.image %}" alt="" loading="lazy">
+        {% if item.photo %}
+          <img class="menu-photo" src="{% static item.photo %}" alt="" loading="lazy">
         {% else %}
-          <span class="menu-tile" aria-hidden="true">{{ item.name|initial }}</span>
+          <span class="menu-tile" aria-hidden="true">{{ item.name|monogram }}</span>
         {% endif %}
         <div class="menu-info">
           <h3><span class="diet {% if item.is_veg %}veg{% else %}non-veg{% endif %}" title="{% if item.is_veg %}Vegetarian{% else %}Non-vegetarian{% endif %}"><span class="visually-hidden">{% if item.is_veg %}Vegetarian{% else %}Non-vegetarian{% endif %}:</span></span>{{ item.name }}</h3>
