@@ -10,7 +10,8 @@ framework. Until a customer sets a location, Cravio
 shows Kannur, and only restaurants that deliver to the current location are listed.
 
 **[▶ Live demo](https://cravio-p4lw.onrender.com)** (deployed on Render from [`render.yaml`](render.yaml)). The free
-server sleeps when idle, so the first visit takes about 30 seconds. To try Ask Cravio there, paste **your own
+server sleeps when idle, so the first visit after a quiet spell takes about 20 seconds; the demo
+database is built with the app, so waking up only starts the web server. To try Ask Cravio there, paste **your own
 Claude API key** in the chat panel: it stays in your browser tab, is sent only with your messages and is
 never stored on the server.
 
